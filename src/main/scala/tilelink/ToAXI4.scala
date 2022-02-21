@@ -206,9 +206,9 @@ class TLToAXI4(val combinational: Boolean = true, val adapterName: Option[String
       val r_holds_d = RegInit(Bool(false))
       when (out.r.fire()) { r_holds_d := !out.r.bits.last }
       // Give R higher priority than B
-      val r_wins = out.r.valid || r_holds_d
+      val r_wins = (out.r.valid && !RegNext(out.b.valid && !out.b.ready)) || r_holds_d
 
-      out.r.ready := in.d.ready
+      out.r.ready := in.d.ready && r_wins
       out.b.ready := in.d.ready && !r_wins
       in.d.valid := Mux(r_wins, out.r.valid, out.b.valid)
 
